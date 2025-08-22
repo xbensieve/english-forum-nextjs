@@ -16,8 +16,8 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => {
-        // default allow if token exists
+      authorized: ({ req, token }) => {
+        // Default allow if token exists
         if (!token) return false;
         // Example: allow if route contains /admin only for admins
         const pathname = new URL(req.url).pathname;
@@ -31,5 +31,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"], // apply middleware to these
+  matcher: ["/dashboard/:path*", "/admin/:path*"], // Apply middleware to these routes
 };
