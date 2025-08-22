@@ -1,5 +1,5 @@
 "use client";
-
+import { MenuProps } from "antd";
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +13,7 @@ import {
   SearchIcon,
   LogIn,
 } from "lucide-react";
+
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import Dropdown from "antd/es/dropdown/dropdown";

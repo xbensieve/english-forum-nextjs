@@ -1,7 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import dbConnect from "@/lib/mongodb";
-import User from "@/models/User";
+import User, { IUser } from "@/models/User";
 
 const authOptions: NextAuthOptions = {
   providers: [
@@ -22,14 +22,16 @@ const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       await dbConnect();
       if (user?.email) {
-        let dbUser = await User.findOne({ email: user.email });
+        let dbUser = (await User.findOne({
+          email: user.email,
+        })) as IUser | null;
         if (!dbUser) {
-          dbUser = await User.create({
+          dbUser = (await User.create({
             name: user.name,
             email: user.email,
             avatar: user.image,
             role: "user",
-          });
+          })) as IUser;
         }
         token.id = dbUser._id.toString();
         token.role = dbUser.role;
