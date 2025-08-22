@@ -1,21 +1,28 @@
 "use client";
-
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { Layout } from "antd";
 import AppHeader from "./AppHeader";
-import AppFooter from "./AppFooter";
+import Loading from "../ui/Loading";
+import Sidebar from "../ui/Sidebar";
 
 const { Content } = Layout;
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
+  const { status } = useSession();
+  const pathname = usePathname();
+
+  if (status === "loading") return <Loading />;
+
+  if (pathname === "/login") return <>{children}</>;
+
   return (
-    <Layout className="min-h-screen flex flex-col">
+    <Layout className="min-h-screen">
       <AppHeader />
-
-      <Content className="flex-1 mx-auto w-full max-w-6xl px-3 sm:px-4 md:px-6 py-4 md:py-6">
-        {children}
-      </Content>
-
-      <AppFooter />
+      <Layout hasSider>
+        <Sidebar />
+        <Content>{children}</Content>
+      </Layout>
     </Layout>
   );
 }

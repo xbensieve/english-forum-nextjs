@@ -22,6 +22,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt", // Use JWT instead of database sessions
     maxAge: 60 * 60 * 24 * 7, // Session valid for 7 days
+    updateAge: 60 * 60,
   },
 
   // JWT configuration

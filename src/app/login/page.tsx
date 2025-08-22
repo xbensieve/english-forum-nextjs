@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import SignInButton from "@/components/ui/SignInButton";
-
+import Loading from "@/components/ui/Loading";
 export default function LoginPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
@@ -16,12 +16,11 @@ export default function LoginPage() {
   }, [status, router]);
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-2xl font-bold mb-4">Login to English Forum</h1>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <SignInButton />
     </div>
   );
