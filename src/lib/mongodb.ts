@@ -1,10 +1,22 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI as string;
 if (!MONGODB_URI) throw new Error("Please define MONGODB_URI");
 
-let cached = (global as any)._mongoose;
-if (!cached) cached = (global as any)._mongoose = { conn: null, promise: null };
+interface MongooseCache {
+  conn: Mongoose | null;
+  promise: Promise<Mongoose> | null;
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var _mongoose: MongooseCache | undefined;
+}
+
+let cached = global._mongoose;
+if (!cached) {
+  cached = global._mongoose = { conn: null, promise: null };
+}
 
 export default async function dbConnect() {
   if (cached.conn) return cached.conn;
