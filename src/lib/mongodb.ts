@@ -11,7 +11,7 @@ interface Cached {
   promise: Promise<typeof mongoose> | null;
 }
 
-let cached: Cached = { conn: null, promise: null };
+const cached: Cached = { conn: null, promise: null };
 
 export default async function dbConnect() {
   if (cached.conn) return cached.conn;
