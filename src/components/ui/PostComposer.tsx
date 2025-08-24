@@ -1,15 +1,15 @@
 "use client";
 import React, { useState } from "react";
-import Image from "next/image";
 import { Avatar, Modal } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import PostInput from "./PostInput";
 import SignInButton from "./SignInButton";
 interface PostComposerProps {
-  onSubmit: (content: string) => void;
+  onPostCreated: (content: string) => void;
 }
-export default function PostComposer({ onSubmit }: PostComposerProps) {
+
+export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => setIsModalOpen(true);
   const handleCancel = () => setIsModalOpen(false);
@@ -57,7 +57,7 @@ export default function PostComposer({ onSubmit }: PostComposerProps) {
               : undefined,
           }}
           onClose={handleCancel}
-          onSubmit={onSubmit}
+          onSubmit={onPostCreated}
         />
       </Modal>
     </div>
