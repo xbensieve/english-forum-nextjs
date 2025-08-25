@@ -3,6 +3,7 @@ import { Schema, model, models, Types } from "mongoose";
 export interface IPost {
   _id?: string;
   content: string;
+  imageUrls?: string[];
   userId: Types.ObjectId;
   userImage: string;
   userName: string;
@@ -15,6 +16,7 @@ export interface IPost {
 const PostSchema = new Schema<IPost>(
   {
     content: { type: String, required: true, trim: true },
+    imageUrls: { type: [String], default: [] },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     userImage: { type: String, required: true },
     userName: { type: String, required: true },

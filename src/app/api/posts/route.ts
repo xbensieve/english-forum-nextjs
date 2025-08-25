@@ -9,10 +9,11 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { content } = await req.json();
+  const { content, imageUrls } = await req.json();
   await dbConnect();
   const post = await Post.create({
     content,
+    imageUrls: imageUrls || [],
     userId: session.user.id,
     userImage: session.user.image || "",
     userName: session.user.name || "",
@@ -23,6 +24,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  await dbConnect();
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "5", 10);

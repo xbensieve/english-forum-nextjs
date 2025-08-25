@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import PostInput from "./PostInput";
 import SignInButton from "./SignInButton";
 interface PostComposerProps {
-  onPostCreated: (content: string) => void;
+  onPostCreated: (content: string, imageUrls: string[]) => void;
 }
 
 export default function PostComposer({ onPostCreated }: PostComposerProps) {
@@ -33,7 +33,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             className="w-full text-left rounded-2xl shadow-sm h-12 flex items-center px-4 text-gray-500 hover:bg-gray-100 duration-300 cursor-pointer"
             onClick={showModal}
           >
-            What&#39;s on your mind, {session.user?.name}?
+            Bạn đang nghĩ gì, {session.user?.name}?
           </button>
         </div>
       </div>
@@ -57,7 +57,9 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               : undefined,
           }}
           onClose={handleCancel}
-          onSubmit={onPostCreated}
+          onSubmit={(content, imageUrls) => {
+            onPostCreated(content, imageUrls);
+          }}
         />
       </Modal>
     </div>

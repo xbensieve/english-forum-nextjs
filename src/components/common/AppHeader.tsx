@@ -17,6 +17,7 @@ import {
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import Dropdown from "antd/es/dropdown/dropdown";
+import { useRouter } from "next/navigation";
 interface MenuItem {
   key: string;
   label: string;
@@ -27,22 +28,23 @@ interface MenuItem {
 export default function AppHeader() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const baseMenuItems: MenuItem[] = [
     {
       key: "home",
-      label: "Home",
+      label: "Trang chủ",
       href: "/",
       icon: <HomeIcon />,
     },
     {
       key: "chat",
-      label: "Chat",
+      label: "Trò chuyện cùng AI",
       href: "/chat",
       icon: <MessageCircleMore />,
     },
     {
       key: "search",
-      label: "Search",
+      label: "Tìm kiếm",
       href: "/search",
       icon: <SearchIcon />,
     },
@@ -53,13 +55,13 @@ export default function AppHeader() {
         ...baseMenuItems,
         {
           key: "profile",
-          label: "Profile",
+          label: "Hồ sơ",
           href: "/profile",
           icon: <User2 className="w-5 h-5" />,
         },
         {
           key: "signout",
-          label: "Sign out",
+          label: "Đăng xuất",
           href: "#",
           icon: <LogOut className="w-5 h-5" />,
         },
@@ -68,7 +70,7 @@ export default function AppHeader() {
         ...baseMenuItems,
         {
           key: "login",
-          label: "Login",
+          label: "Đăng nhập",
           href: "/login",
           icon: <LogIn className="w-5 h-5" />,
         },
@@ -77,7 +79,7 @@ export default function AppHeader() {
   const dropdownItems: MenuProps["items"] = [
     {
       key: "profile",
-      label: <Link href="/profile">Profile</Link>,
+      label: <Link href="/profile">Hồ sơ</Link>,
       icon: <User2 className="w-5 h-5" />,
     },
     {
@@ -87,7 +89,7 @@ export default function AppHeader() {
           onClick={() => signOut()}
           className="text-red-500 hover:text-red-600"
         >
-          Sign out
+          Đăng xuất
         </span>
       ),
       icon: <LogOut className="w-5 h-5" />,
@@ -97,8 +99,19 @@ export default function AppHeader() {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold text-blue-600">
-          English Forum
+        <Link
+          href="/"
+          className="text-xl font-bold text-blue-600 flex items-center gap-3 hover:text-blue-700 transition duration-200"
+        >
+          <Image
+            src="/logo/logo-forum-2025.png"
+            alt="Forum Logo"
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-full shadow-sm hover:scale-110 transition duration-200"
+            priority
+          />
+          Forum
         </Link>
         <nav className="hidden md:flex space-x-4 items-center">
           {baseMenuItems.map((item) => (
@@ -106,6 +119,10 @@ export default function AppHeader() {
               key={item.key}
               href={item.href}
               className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition"
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(item.href, { scroll: false });
+              }}
             >
               {item.icon}
               <span>{item.label}</span>
@@ -125,8 +142,8 @@ export default function AppHeader() {
             <Link href="/login" className="group">
               <button className="flex items-center gap-2 px-2 py-1 rounded-full cursor-pointer transition duration-200">
                 <LogIn className="w-5 h-5 text-blue-500 transition-colors duration-200 group-hover:text-blue-300" />
-                <span className="text-blue-500 font-medium transition-colors duration-200 group-hover:text-blue-300">
-                  Login
+                <span className="text-blue-500 font-normal transition-colors duration-200 group-hover:text-blue-300">
+                  Đăng nhập
                 </span>
               </button>
             </Link>

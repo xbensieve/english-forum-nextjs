@@ -8,7 +8,7 @@ import {
   CommentOutlined,
   ShareAltOutlined,
 } from "@ant-design/icons";
-
+import PostImages from "@/components/ui/PostImages";
 const { Content } = Layout;
 
 interface Post {
@@ -18,6 +18,7 @@ interface Post {
   content: string;
   likes: number;
   comments: string[];
+  imageUrls?: string[];
 }
 
 export default function HomePage() {
@@ -53,9 +54,12 @@ export default function HomePage() {
     }
   };
 
-  const handlePostCreated = async (content: string) => {
+  const handlePostCreated = async (content: string, imageUrls: string[]) => {
     try {
-      const response = await axios.post<Post>("/api/posts", { content });
+      const response = await axios.post<Post>("/api/posts", {
+        content,
+        imageUrls,
+      });
       setPosts((prev) => [response.data, ...prev]);
     } catch (error) {
       console.error("Failed to create post:", error);
@@ -97,7 +101,6 @@ export default function HomePage() {
               <List
                 itemLayout="vertical"
                 dataSource={posts}
-                loading={loading && posts.length === 0}
                 loadMore={
                   hasMore ? (
                     <div className="flex justify-center py-4">
@@ -124,8 +127,13 @@ export default function HomePage() {
                             {item.userName || "Unknown"}
                           </span>
                         }
-                        description={item.content}
+                        description={
+                          <span className="text-gray-950">{item.content}</span>
+                        }
                       />
+                      {item.imageUrls && item.imageUrls.length > 0 && (
+                        <PostImages images={item.imageUrls} />
+                      )}
                       <div className="border-t pt-3">
                         <Space size="large">
                           <Button

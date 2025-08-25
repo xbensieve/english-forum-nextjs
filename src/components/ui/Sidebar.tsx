@@ -53,9 +53,9 @@ export default function Sidebar({
   };
 
   const menuItems = [
-    { key: "favourite", label: "Favourite" },
+    { key: "favourite", label: "Yêu thích" },
     { key: "hot", label: "Nổi bật" },
-    { key: "trending", label: "Trending" },
+    { key: "trending", label: "Xu hướng" },
   ];
 
   return (
