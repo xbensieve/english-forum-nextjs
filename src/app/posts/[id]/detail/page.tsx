@@ -13,7 +13,7 @@ import ReactionBar from "@/components/ui/post/ReactionBar";
 import CommentSection from "@/components/ui/post/CommentSection";
 import LikesModal from "@/components/ui/post/LikesModal";
 import Loading from "@/components/ui/Loading";
-import { ArrowLeftOutlined, CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined } from "@ant-design/icons";
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -43,7 +43,7 @@ export default function PostDetailPage() {
   }, [id, currentUserId]);
 
   useEffect(() => {
-    if (id && currentUserId) fetchPostDetail();
+    if (id) fetchPostDetail();
   }, [id, currentUserId, fetchPostDetail]);
 
   if (loading) return <Loading />;
@@ -145,6 +145,7 @@ export default function PostDetailPage() {
           image={session?.user?.image || ""}
           comments={comments}
           onAddComment={handleAddComment}
+          disabled={!session?.user}
         />
       </Card>
       <LikesModal

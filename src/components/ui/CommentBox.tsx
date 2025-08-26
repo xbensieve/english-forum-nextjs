@@ -8,9 +8,11 @@ import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 export default function CommentBox({
   image,
   onSubmitAction,
+  disabled,
 }: {
   image: string;
   onSubmitAction: (text: string) => void;
+  disabled: boolean;
 }) {
   const [commentText, setCommentText] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
@@ -50,6 +52,7 @@ export default function CommentBox({
 
       <div className="relative flex-1">
         <Input.TextArea
+          disabled={disabled}
           autoSize={{ minRows: 1, maxRows: 4 }}
           placeholder="Write a comment..."
           value={commentText}

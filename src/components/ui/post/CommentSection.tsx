@@ -7,16 +7,22 @@ interface CommentSectionProps {
   image: string;
   comments: IComment[];
   onAddComment: (text: string) => void;
+  disabled: boolean;
 }
 
 export default function CommentSection({
   image,
   comments,
   onAddComment,
+  disabled,
 }: CommentSectionProps) {
   return (
     <div>
-      <CommentBox image={image} onSubmitAction={onAddComment} />
+      <CommentBox
+        image={image}
+        onSubmitAction={onAddComment}
+        disabled={disabled}
+      />
       <List<IComment>
         itemLayout="horizontal"
         dataSource={comments}
