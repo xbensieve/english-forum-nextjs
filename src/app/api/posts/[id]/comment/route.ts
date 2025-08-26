@@ -39,9 +39,10 @@ export async function POST(
       content: body.content,
     });
 
-    await Post.findByIdAndUpdate(postId, {
-      $push: { comments: newComment._id },
-    });
+    await Post.updateOne(
+      { _id: postId },
+      { $push: { comments: newComment._id } }
+    );
 
     return NextResponse.json({
       success: true,

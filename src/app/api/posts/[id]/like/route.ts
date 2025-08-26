@@ -19,15 +19,19 @@ export async function POST(
     const { id: postId } = await params;
     const userId = session.user.id;
 
-    const existingLike = await Like.findOne({ postId, userId });
+    const existingLike = await Like.findOne({ postId, userId }).lean();
 
     if (existingLike) {
-      await Like.deleteOne({ _id: existingLike._id });
-      await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
+      await Promise.all([
+        Like.deleteOne({ _id: existingLike._id }),
+        Post.updateOne({ _id: postId }, { $inc: { likesCount: -1 } }),
+      ]);
       return NextResponse.json({ liked: false });
     } else {
-      await Like.create({ postId, userId });
-      await Post.findByIdAndUpdate(postId, { $inc: { likesCount: 1 } });
+      await Promise.all([
+        Like.create({ postId, userId }),
+        Post.updateOne({ _id: postId }, { $inc: { likesCount: 1 } }),
+      ]);
       return NextResponse.json({ liked: true });
     }
   } catch (error) {

@@ -17,6 +17,8 @@ const CommentSchema = new Schema<IComment>(
   { timestamps: true }
 );
 
+CommentSchema.index({ postId: 1 });
+
 const Comment: Model<IComment> =
   mongoose.models.Comment || mongoose.model<IComment>("Comment", CommentSchema);
 
