@@ -2,7 +2,9 @@ import { NextResponse, NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import dbConnect from "@/lib/mongodb";
 import Post from "@/models/Post";
+import Comment from "@/models/Comment";
 import { authOptions } from "@/lib/authOptions";
+import Like from "@/models/Like";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -17,7 +19,7 @@ export async function POST(req: NextRequest) {
     userId: session.user.id,
     userImage: session.user.image || "",
     userName: session.user.name || "",
-    likes: 0,
+    likesCount: 0,
     comments: [],
   });
   return NextResponse.json(post, { status: 201 });
@@ -25,6 +27,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   await dbConnect();
+
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "5", 10);
@@ -34,13 +37,26 @@ export async function GET(req: NextRequest) {
   const posts = await Post.find()
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   const total = await Post.countDocuments();
 
+  const postsWithCounts = await Promise.all(
+    posts.map(async (post) => {
+      const commentsCount = await Comment.countDocuments({ postId: post._id });
+      const likesCount = await Like.countDocuments({ postId: post._id });
+      return {
+        ...post,
+        commentsCount,
+        likesCount,
+      };
+    })
+  );
+
   return NextResponse.json(
     {
-      posts,
+      posts: postsWithCounts,
       total,
       hasMore: skip + posts.length < total,
     },

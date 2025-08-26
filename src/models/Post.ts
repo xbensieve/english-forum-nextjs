@@ -1,14 +1,13 @@
 import { Schema, model, models, Types } from "mongoose";
 
 export interface IPost {
-  _id?: string;
   content: string;
   imageUrls?: string[];
   userId: Types.ObjectId;
   userImage: string;
   userName: string;
-  likes: number;
-  comments: string[];
+  likesCount: number;
+  comments: Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -20,8 +19,8 @@ const PostSchema = new Schema<IPost>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     userImage: { type: String, required: true },
     userName: { type: String, required: true },
-    likes: { type: Number, default: 0 },
-    comments: { type: [String], default: [] },
+    likesCount: { type: Number, default: 0 },
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   },
   { timestamps: true }
 );
