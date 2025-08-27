@@ -5,10 +5,10 @@ import Providers from "@/components/Providers";
 import { Toaster } from "react-hot-toast";
 import ProgressBar from "@/components/ui/ProgressBar";
 export const metadata: Metadata = {
-  title: "English Forum",
-  description: "A place to share and learn English knowledge",
+  title: "Community Forum",
+  description:
+    "A place to share knowledge, ask questions, and connect with others",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
