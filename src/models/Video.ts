@@ -7,6 +7,7 @@ export interface IVideo {
   userId: mongoose.Types.ObjectId;
   userImage: string;
   userName: string;
+  views?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -19,6 +20,7 @@ const videoSchema = new Schema<IVideo>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     userImage: { type: String, required: true },
     userName: { type: String, required: true },
+    views: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

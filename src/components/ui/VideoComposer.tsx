@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Avatar, Modal, Input, Tag, Button } from "antd";
+import { Avatar, Modal, Input, Button } from "antd";
 import {
   UserOutlined,
   VideoCameraOutlined,
@@ -15,19 +15,17 @@ import {
 } from "next-cloudinary";
 import dynamic from "next/dynamic";
 import axios from "axios";
-
+import toast from "react-hot-toast";
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
 export default function VideoComposer() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [videoData, setVideoData] = useState<{
     url: string;
     public_id: string;
   } | null>(null);
   const [title, setTitle] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [status, setStatus] = useState<string>("");
 
   const { data: session } = useSession();
 
@@ -39,13 +37,11 @@ export default function VideoComposer() {
     setIsModalOpen(false);
     setVideoData(null);
     setTitle("");
-    setStatus("");
     setShowEmojiPicker(false);
-    setUploading(false);
   };
   const handlePostVideo = async () => {
     if (!videoData || !title) {
-      setStatus("Title and video are required");
+      toast.error("Tiêu đề và video là bắt buộc");
       return;
     }
 
@@ -60,30 +56,35 @@ export default function VideoComposer() {
         throw new Error("Failed to save video to database");
       }
 
-      setStatus("Video saved successfully");
+      toast.success("Video đã được đăng thành công!");
+      window.dispatchEvent(
+        new CustomEvent("video:new", { detail: response.data.video })
+      );
       setVideoData(null);
       setTitle("");
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error saving video:", error);
-      setStatus("Failed to save video");
+      toast.error("Failed to save video");
     }
   };
 
   return (
     <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-4">
       <div className="flex items-start gap-4">
-        <Avatar
-          size={48}
-          src={session?.user?.image}
-          icon={!session?.user?.image && <UserOutlined />}
-        />
+        <div className="flex-shrink-0">
+          <Avatar
+            size={48}
+            src={session?.user?.image}
+            icon={!session?.user?.image && <UserOutlined />}
+          />
+        </div>
         <div className="flex-1">
           <button
             className="w-full text-left rounded-2xl shadow-sm h-12 flex items-center px-4 text-gray-500 hover:bg-gray-100 duration-300 cursor-pointer"
             onClick={showModal}
           >
-            Chia sẻ video, {session.user?.name}?
+            Chia sẻ video, {session.user?.name}...
           </button>
         </div>
       </div>
@@ -93,18 +94,18 @@ export default function VideoComposer() {
         onCancel={handleCancel}
         footer={[
           <Button key="cancel" onClick={handleCancel}>
-            Cancel
+            <span>Hủy</span>
           </Button>,
           <Button
             key="post"
             type="primary"
             onClick={handlePostVideo}
-            disabled={!videoData || !title || uploading}
+            disabled={!videoData || !title}
           >
-            Post Video
+            <span>Đăng video</span>
           </Button>,
         ]}
-        title="Upload Video"
+        title="Đăng video"
       >
         <div className="flex flex-col gap-4">
           <Input
@@ -154,30 +155,13 @@ export default function VideoComposer() {
                   url: info.secure_url,
                   public_id: info.public_id,
                 });
-                setStatus("Uploaded successfully");
               }
-              setUploading(false);
-            }}
-            onOpen={() => {
-              setUploading(true);
-              setStatus("Uploading...");
             }}
           >
             <>
-              <VideoCameraOutlined />{" "}
-              {uploading ? "Uploading..." : "Upload Video"}
+              <VideoCameraOutlined /> <span>Tải video lên</span>
             </>
           </CldUploadButton>
-
-          {status && (
-            <Tag
-              color={
-                uploading ? "blue" : status.includes("Failed") ? "red" : "green"
-              }
-            >
-              {status}
-            </Tag>
-          )}
 
           {videoData && (
             <div className="mt-4">
@@ -187,8 +171,6 @@ export default function VideoComposer() {
                 width={400}
                 className="rounded-lg border"
               />
-              <p className="mt-2 text-gray-500 text-sm">Title: {title}</p>
-              <p className="mt-2 text-gray-500 text-sm">URL: {videoData.url}</p>
             </div>
           )}
         </div>

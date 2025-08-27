@@ -24,8 +24,10 @@
     "next": "15.4.6",
     "next-auth": "^4.24.11",
     "next-cloudinary": "^6.16.0",
+    "nextjs-progressbar": "^0.0.16",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-hot-toast": "^2.6.0",
     "react-i18next": "^15.6.1",
     "react-swipeable": "^7.0.2"
   },

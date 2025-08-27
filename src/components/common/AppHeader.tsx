@@ -111,7 +111,7 @@ export default function AppHeader() {
             className="w-8 h-8 rounded-full shadow-sm hover:scale-110 transition duration-200"
             priority
           />
-          Forum
+          The Forum
         </Link>
         <nav className="hidden md:flex space-x-4 items-center">
           {baseMenuItems.map((item) => (

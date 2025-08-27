@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
       userId: session.user.id,
       userImage: session.user.image || "",
       userName: session.user.name || "",
+      views: 0,
     });
 
     await video.save();

@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import PostImages from "@/components/ui/PostImages";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const { Content } = Layout;
 
@@ -67,7 +68,10 @@ export default function HomePage() {
         content,
         imageUrls,
       });
-      setPosts((prev) => [response.data, ...prev]);
+      if (response.status === 201) {
+        setPosts((prev) => [response.data, ...prev]);
+        toast.success("Bài viết đã được tạo thành công!");
+      }
     } catch (error) {
       console.error("Failed to create post:", error);
     }
