@@ -12,8 +12,8 @@ export default function Sidebar() {
   const [selectedKey, setSelectedKey] = useState("");
   const [visible, setVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [initialWidth, setInitialWidth] = useState<number | null>(null);
   const pathname = usePathname();
+
   const menuItems = useMemo(
     () => [
       { key: "favourite", label: "Videos", href: "/videos" },
@@ -25,37 +25,26 @@ export default function Sidebar() {
 
   useEffect(() => {
     const currentItem = menuItems.find((item) => item.href === pathname);
-    if (currentItem) {
-      setSelectedKey(currentItem.key);
-    } else {
-      setSelectedKey("");
-    }
+    setSelectedKey(currentItem ? currentItem.key : "");
   }, [pathname, menuItems]);
 
   useEffect(() => {
     const handleResize = () => {
-      const currentWidth = window.innerWidth;
-      if (initialWidth === null) {
-        setInitialWidth(currentWidth);
-        setIsMobile(false);
-      } else if (currentWidth < initialWidth) {
+      if (window.innerWidth < 768) {
         setIsMobile(true);
       } else {
         setIsMobile(false);
         setVisible(false);
       }
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [initialWidth]);
+  }, []);
 
   const handlers = useSwipeable({
     onSwipedRight: () => {
-      if (isMobile) {
-        setVisible(true);
-      }
+      if (isMobile) setVisible(true);
     },
     trackMouse: true,
     delta: 50,
@@ -63,9 +52,7 @@ export default function Sidebar() {
 
   const handleClick = (e: { key: string }) => {
     setSelectedKey(e.key);
-    if (isMobile) {
-      setVisible(false);
-    }
+    if (isMobile) setVisible(false);
   };
 
   return (
