@@ -1,26 +1,47 @@
 "use client";
-import { MenuOutlined } from "@ant-design/icons";
 import { Layout, Menu, Drawer } from "antd";
 import { CircleArrowRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSwipeable } from "react-swipeable";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 const { Sider } = Layout;
 
-interface SidebarProps {
-  defaultSelected?: string;
-}
-
-export default function Sidebar({
-  defaultSelected = "trending",
-}: SidebarProps) {
-  const [selectedKey, setSelectedKey] = useState(defaultSelected);
+export default function Sidebar() {
+  const [selectedKey, setSelectedKey] = useState("");
   const [visible, setVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [initialWidth, setInitialWidth] = useState<number | null>(null);
+  const pathname = usePathname();
+  const menuItems = useMemo(
+    () => [
+      { key: "favourite", label: "Videos", href: "/videos" },
+      { key: "hot", label: "News", href: "/news" },
+      { key: "trending", label: "Trending", href: "/trending" },
+    ],
+    []
+  );
+
+  useEffect(() => {
+    const currentItem = menuItems.find((item) => item.href === pathname);
+    if (currentItem) {
+      setSelectedKey(currentItem.key);
+    } else {
+      setSelectedKey("");
+    }
+  }, [pathname, menuItems]);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-      if (window.innerWidth > 768) {
+      const currentWidth = window.innerWidth;
+      if (initialWidth === null) {
+        setInitialWidth(currentWidth);
+        setIsMobile(false);
+      } else if (currentWidth < initialWidth) {
+        setIsMobile(true);
+      } else {
+        setIsMobile(false);
         setVisible(false);
       }
     };
@@ -28,9 +49,8 @@ export default function Sidebar({
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [initialWidth]);
 
-  // Swipe handler
   const handlers = useSwipeable({
     onSwipedRight: () => {
       if (isMobile) {
@@ -47,16 +67,6 @@ export default function Sidebar({
       setVisible(false);
     }
   };
-
-  const toggleDrawer = () => {
-    setVisible(!visible);
-  };
-
-  const menuItems = [
-    { key: "favourite", label: "Yêu thích" },
-    { key: "hot", label: "Nổi bật" },
-    { key: "trending", label: "Xu hướng" },
-  ];
 
   return (
     <>
@@ -75,7 +85,7 @@ export default function Sidebar({
             }}
           >
             <div
-              onClick={toggleDrawer}
+              onClick={() => setVisible(!visible)}
               style={{
                 position: "absolute",
                 top: "15%",
@@ -110,7 +120,14 @@ export default function Sidebar({
               selectedKeys={[selectedKey]}
               onClick={handleClick}
               style={{ height: "100%", borderRight: 0 }}
-              items={menuItems}
+              items={menuItems.map((item) => ({
+                key: item.key,
+                label: (
+                  <Link href={item.href} style={{ textDecoration: "none" }}>
+                    {item.label}
+                  </Link>
+                ),
+              }))}
             />
           </Drawer>
         </>
@@ -131,7 +148,14 @@ export default function Sidebar({
             selectedKeys={[selectedKey]}
             onClick={handleClick}
             style={{ height: "100%", borderRight: 0 }}
-            items={menuItems}
+            items={menuItems.map((item) => ({
+              key: item.key,
+              label: (
+                <Link href={item.href} style={{ textDecoration: "none" }}>
+                  {item.label}
+                </Link>
+              ),
+            }))}
           />
         </Sider>
       )}

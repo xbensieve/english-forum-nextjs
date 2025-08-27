@@ -87,7 +87,6 @@ export default function PostInput({
           options={{ resourceType: "image" }}
           onUploadAdded={() => setLoading(true)}
           onSuccess={(result: CloudinaryUploadWidgetResults) => {
-            // Type guard to ensure info is defined, an object, and has required properties
             if (
               result?.info &&
               typeof result.info === "object" &&

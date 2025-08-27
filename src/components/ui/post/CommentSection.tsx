@@ -1,6 +1,6 @@
 "use client";
 import { List, Avatar } from "antd";
-import CommentBox from "@/components/ui/CommentBox";
+import CommentBox from "@/components/ui/post/CommentBox";
 import type { IComment } from "@/types/PostDetail";
 
 interface CommentSectionProps {

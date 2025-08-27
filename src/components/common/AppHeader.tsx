@@ -38,7 +38,7 @@ export default function AppHeader() {
     },
     {
       key: "chat",
-      label: "Trò chuyện cùng AI",
+      label: "Trò chuyện",
       href: "/chat",
       icon: <MessageCircleMore />,
     },
