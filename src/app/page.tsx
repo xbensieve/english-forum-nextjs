@@ -192,6 +192,9 @@ export default function HomePage() {
                           </Text>
                         </div>
                       </div>
+                      <div className="whitespace-pre-wrap mb-4">
+                        {item.content}
+                      </div>
                       {item.imageUrls && item.imageUrls.length > 0 && (
                         <PostImages images={item.imageUrls} />
                       )}
