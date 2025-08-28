@@ -2,18 +2,19 @@
 import PostComposer from "@/components/ui/PostComposer";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Layout, Card, Avatar, List, Button, Empty, message } from "antd";
+import { Layout, Card, Avatar, List, Button, message, Typography } from "antd";
 import {
   LikeOutlined,
   CommentOutlined,
   ShareAltOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import PostImages from "@/components/ui/PostImages";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const { Content } = Layout;
-
+const { Text } = Typography;
 interface Post {
   _id: string;
   userName?: string;
@@ -23,6 +24,7 @@ interface Post {
   commentsCount: number;
   imageUrls?: string[];
   likes?: { userId: { _id: string } }[];
+  createdAt: string;
 }
 
 export default function HomePage() {
@@ -131,8 +133,12 @@ export default function HomePage() {
           <div className="w-full max-w-2xl space-y-3">
             <PostComposer onPostCreated={handlePostCreated} />
 
-            {posts.length === 0 && !loading ? (
-              <Empty description="Chưa có bài viết nào" />
+            {posts.length === 0 ? (
+              loading ? (
+                <div className="text-center py-4 text-gray-500">
+                  Đang tải...
+                </div>
+              ) : null
             ) : (
               <List
                 itemLayout="vertical"
@@ -156,18 +162,36 @@ export default function HomePage() {
                 renderItem={(item) => (
                   <List.Item key={item._id} style={{ marginBottom: "3px" }}>
                     <Card className="shadow rounded-2xl">
-                      <List.Item.Meta
-                        avatar={<Avatar src={item.userImage || undefined} />}
-                        title={
-                          <span className="font-semibold">
-                            {item.userName || "Unknown"}
-                          </span>
-                        }
-                        description={
-                          <span className="text-gray-950">{item.content}</span>
-                        }
-                      />
-
+                      <List.Item.Meta />
+                      <div className="flex items-center gap-4 mb-4">
+                        <Avatar
+                          size={48}
+                          src={item.userImage}
+                          icon={!item.userImage && <UserOutlined />}
+                        />
+                        <div>
+                          <Text strong>{item.userName}</Text>
+                          <br />
+                          <Text type="secondary">
+                            {new Date(item.createdAt).toLocaleDateString(
+                              "vi-VN",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              }
+                            )}{" "}
+                            {new Date(item.createdAt).toLocaleTimeString(
+                              "vi-VN",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              }
+                            )}
+                          </Text>
+                        </div>
+                      </div>
                       {item.imageUrls && item.imageUrls.length > 0 && (
                         <PostImages images={item.imageUrls} />
                       )}

@@ -12,6 +12,10 @@ export default function VideoPlayer({ videoId, src }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasCountedView, setHasCountedView] = useState(false);
 
+  const posterUrl = src
+    .replace("/upload/", "/upload/so_5/")
+    .replace(/\.\w+$/, ".jpg");
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -51,7 +55,17 @@ export default function VideoPlayer({ videoId, src }: Props) {
 
   return (
     <div className="rounded-lg overflow-hidden shadow">
-      <video ref={videoRef} src={src} controls className="w-full h-auto" />
+      <video
+        ref={videoRef}
+        src={src}
+        poster={posterUrl}
+        controls
+        playsInline
+        muted
+        loop
+        preload="metadata"
+        className="w-full h-auto rounded-lg shadow-lg"
+      />
     </div>
   );
 }

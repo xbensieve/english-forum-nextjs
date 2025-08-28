@@ -1,13 +1,15 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { Button, Typography } from "antd";
+import { Button, Typography, Spin } from "antd";
 import Image from "next/image";
+import { useState } from "react";
 
 const { Title, Text } = Typography;
 
 export default function ProfilePage() {
   const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
 
   if (!session?.user) {
     return (
@@ -17,8 +19,18 @@ export default function ProfilePage() {
     );
   }
 
+  const handleSignOut = async () => {
+    setLoading(true);
+    await signOut({ callbackUrl: "/" });
+  };
+
   return (
-    <div className="flex justify-center items-center min-h-screen px-4 py-8">
+    <div className="flex justify-center items-center min-h-screen px-4 py-8 relative">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-50">
+          <Spin size="large" tip="Signing out..." />
+        </div>
+      )}
       <div className="flex flex-col items-center p-6 space-y-4">
         <Image
           src={session.user.image || "/default-avatar.png"}
@@ -36,8 +48,8 @@ export default function ProfilePage() {
         <span className="inline-block px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 rounded">
           {session.user.role?.toUpperCase() || "USER"}
         </span>
-        <Button type="primary" onClick={() => signOut()}>
-          Sign Out{" "}
+        <Button type="primary" loading={loading} onClick={handleSignOut}>
+          Sign Out
         </Button>
       </div>
     </div>

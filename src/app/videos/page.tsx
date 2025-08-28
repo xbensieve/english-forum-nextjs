@@ -73,18 +73,6 @@ export default function VideoPage() {
     fetchVideos(1);
   }, []);
 
-  const handleView = async (videoId: string) => {
-    try {
-      await axios.post(`/api/videos/${videoId}/view`);
-      setVideos((prev) =>
-        prev.map((v) =>
-          v._id === videoId ? { ...v, views: (v.views || 0) + 1 } : v
-        )
-      );
-    } catch (error) {
-      console.error("Failed to increment view:", error);
-    }
-  };
   useEffect(() => {
     const handler = (e: Event) => {
       const { detail } = e as CustomEvent<Video>;
