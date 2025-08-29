@@ -12,11 +12,13 @@ import {
 import PostImages from "@/components/ui/PostImages";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 const { Content } = Layout;
 const { Text } = Typography;
 interface Post {
   _id: string;
+  userId: string;
   userName?: string;
   userImage?: string;
   content: string;
@@ -164,33 +166,38 @@ export default function HomePage() {
                     <Card className="shadow rounded-2xl">
                       <List.Item.Meta />
                       <div className="flex items-center gap-4 mb-4">
-                        <Avatar
-                          size={48}
-                          src={item.userImage}
-                          icon={!item.userImage && <UserOutlined />}
-                        />
-                        <div>
-                          <Text strong>{item.userName}</Text>
-                          <br />
-                          <Text type="secondary">
-                            {new Date(item.createdAt).toLocaleDateString(
-                              "vi-VN",
-                              {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                              }
-                            )}{" "}
-                            {new Date(item.createdAt).toLocaleTimeString(
-                              "vi-VN",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              }
-                            )}
-                          </Text>
-                        </div>
+                        <Link
+                          href={`/users/${item.userId}`}
+                          className="flex items-center gap-4"
+                        >
+                          <Avatar
+                            size={48}
+                            src={item.userImage}
+                            icon={!item.userImage && <UserOutlined />}
+                          />
+                          <div>
+                            <Text strong>{item.userName}</Text>
+                            <br />
+                            <Text type="secondary">
+                              {new Date(item.createdAt).toLocaleDateString(
+                                "vi-VN",
+                                {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                }
+                              )}{" "}
+                              {new Date(item.createdAt).toLocaleTimeString(
+                                "vi-VN",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                }
+                              )}
+                            </Text>
+                          </div>
+                        </Link>
                       </div>
                       <div className="whitespace-pre-wrap mb-4">
                         {item.content}

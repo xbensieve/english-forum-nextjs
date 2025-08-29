@@ -2,12 +2,8 @@
 
 @import "antd/dist/reset.css";
 
-:root {
-  --brand-blue: #2563eb;
-  --brand-dark: #0b1b3a;
-}
-
 html,
 body {
   height: 100%;
+  background-color: #f3f4f6;
 }
