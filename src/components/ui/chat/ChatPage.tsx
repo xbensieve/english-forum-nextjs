@@ -80,7 +80,7 @@ export default function ChatPage({ userId }: ChatPageProps) {
     );
   }
 
-  if (loading) return <Spin className="w-full h-[600px]" />;
+  if (loading) return <Spin fullscreen />;
 
   if (!user) {
     return (
