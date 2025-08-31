@@ -33,12 +33,15 @@ function createPeerConnection(
   });
 
   pc.ontrack = (event: RTCTrackEvent) => {
-    event.streams.forEach((stream) => {
-      if (stream.id === localStream?.id) return;
-      if (onRemoteStream) {
-        onRemoteStream(stream);
-      }
-    });
+    if (onRemoteStream) {
+      const remoteOnly = new MediaStream();
+      event.streams[0].getTracks().forEach((track) => {
+        if (track.kind === "audio") {
+          remoteOnly.addTrack(track);
+        }
+      });
+      onRemoteStream(remoteOnly);
+    }
   };
 
   pc.onicecandidate = (event: RTCPeerConnectionIceEvent) => {

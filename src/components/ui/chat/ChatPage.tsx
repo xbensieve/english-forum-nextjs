@@ -229,6 +229,7 @@ export default function ChatPage({ userId }: ChatPageProps) {
   useEffect(() => {
     if (remoteAudioRef.current && remoteStream) {
       remoteAudioRef.current.srcObject = remoteStream;
+      remoteAudioRef.current.volume = 1;
     }
   }, [remoteStream]);
 
@@ -282,7 +283,12 @@ export default function ChatPage({ userId }: ChatPageProps) {
                 </Text>
               </div>
 
-              <audio ref={remoteAudioRef} autoPlay controls={false} />
+              <audio
+                ref={remoteAudioRef}
+                autoPlay
+                controls={false}
+                playsInline
+              />
               {!calling && !incomingCall ? (
                 <Tooltip title="Bắt đầu cuộc gọi" placement="top">
                   <Button
