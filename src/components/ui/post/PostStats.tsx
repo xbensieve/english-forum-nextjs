@@ -16,9 +16,11 @@ export default function PostStats({
         className="flex-1 text-left cursor-pointer hover:underline"
         onClick={onShowLikes}
       >
-        {likesCount} Likes
+        {likesCount} <span>Lượt thích</span>
       </span>
-      <span className="flex-1 text-right">{commentsCount} Comments</span>
+      <span className="flex-1 text-right">
+        {commentsCount} <span>Bình luận</span>
+      </span>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   onValue,
   push,
   remove,
+  get,
   DataSnapshot,
 } from "firebase/database";
 
@@ -74,18 +75,12 @@ export async function answerCall(
   localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
   createPeerConnection(chatId, calleeId);
 
-  const offerSnap: RTCSessionDescriptionInit | null = await new Promise(
-    (resolve) =>
-      onValue(
-        ref(db, `chats/${chatId}/call/offer`),
-        (snap: DataSnapshot) => resolve(snap.val()),
-        { onlyOnce: true }
-      )
-  );
+  // lấy offer một lần bằng get
+  const offerSnap = await get(ref(db, `chats/${chatId}/call/offer`));
+  if (!offerSnap.exists()) return;
 
-  if (!offerSnap) return;
-
-  await pc!.setRemoteDescription(new RTCSessionDescription(offerSnap));
+  const offer = offerSnap.val();
+  await pc!.setRemoteDescription(new RTCSessionDescription(offer));
 
   const answer: RTCSessionDescriptionInit = await pc!.createAnswer();
   await pc!.setLocalDescription(answer);

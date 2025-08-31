@@ -7,6 +7,7 @@ import { ref, onValue } from "firebase/database";
 import { Card, Avatar, Typography, Spin } from "antd";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Message {
   senderId: string;
@@ -88,8 +89,24 @@ export default function ConversationsPage() {
     return () => unsubscribe();
   }, [session]);
 
-  if (status === "loading" || loading) return <Spin fullscreen />;
-  if (!session?.user) return <div>Please log in</div>;
+  if (status === "loading") return <Spin fullscreen />;
+
+  if (!session?.user)
+    return (
+      <div className="flex justify-center items-center h-[600px]">
+        <div className="p-8 flex flex-col items-center gap-4">
+          <Typography.Text type="secondary" className="text-lg">
+            Please log in to continue
+          </Typography.Text>
+          <Link
+            href="/login"
+            className="px-6 py-2 rounded-xl bg-blue-500 text-white font-medium hover:bg-blue-600 transition"
+          >
+            Login
+          </Link>
+        </div>
+      </div>
+    );
 
   const handleOpenChat = (partnerId: string) => {
     if (!partnerId) return;
@@ -98,26 +115,43 @@ export default function ConversationsPage() {
   };
 
   return (
-    <div className="w-full md:w-2/3 mx-auto p-4">
-      <Typography.Title level={3}>Your Conversations</Typography.Title>
-      {conversations.map((conv) => (
-        <Card
-          key={conv.chatId}
-          className="mb-3 flex flex-row items-center cursor-pointer hover:shadow-md transition"
-          onClick={() => handleOpenChat(conv.partner._id)}
-        >
-          <Avatar src={conv.partner.avatar}>{conv.partner.name?.[0]}</Avatar>
-          <div className="ml-3 flex flex-col">
-            <Typography.Text strong>{conv.partner.name}</Typography.Text>
-            <Typography.Text
-              type="secondary"
-              ellipsis={{ tooltip: conv.lastMessage }}
+    <div className="w-full max-w-2xl mx-auto p-2 sm:p-4">
+      <Typography.Title level={3} className="!mb-4">
+        Trò chuyện
+      </Typography.Title>
+
+      <div className="flex flex-col divide-y rounded-lg bg-white max-h-[600px] overflow-y-auto">
+        {conversations.length > 0 ? (
+          conversations.map((conv) => (
+            <div
+              key={conv.chatId}
+              onClick={() => handleOpenChat(conv.partner._id)}
+              className="flex items-center gap-3 p-3 cursor-pointer"
             >
-              {conv.lastMessage}
-            </Typography.Text>
+              <Avatar size={48} src={conv.partner.avatar}>
+                {conv.partner.name?.[0]}
+              </Avatar>
+
+              <div className="flex flex-col flex-1 min-w-0">
+                <Typography.Text strong className="truncate">
+                  {conv.partner.name}
+                </Typography.Text>
+                <Typography.Text
+                  type="secondary"
+                  ellipsis={{ tooltip: conv.lastMessage }}
+                  className="truncate"
+                >
+                  {conv.lastMessage || "Chưa có tin nhắn"}
+                </Typography.Text>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="p-4 text-center text-gray-500">
+            Chưa có cuộc trò chuyện nào
           </div>
-        </Card>
-      ))}
+        )}
+      </div>
     </div>
   );
 }

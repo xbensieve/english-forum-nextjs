@@ -208,14 +208,17 @@ export default function HomePage() {
 
                       <div className="flex justify-between text-sm text-gray-500 mt-2 mb-2">
                         <span>
-                          {item.likesCount > 0
-                            ? `${item.likesCount} Likes`
-                            : "No Likes"}
+                          {item.likesCount === 0
+                            ? "Không có lượt thích"
+                            : item.likesCount === 1
+                            ? "1 lượt thích"
+                            : `${item.likesCount} lượt thích`}
                         </span>
+
                         <span>
                           {item.commentsCount > 0
-                            ? `${item.commentsCount} Comments`
-                            : "No Comments"}
+                            ? `${item.commentsCount} Bình luận`
+                            : "Không có bình luận"}
                         </span>
                       </div>
                       <div className="border-t pt-3">
@@ -226,7 +229,7 @@ export default function HomePage() {
                             icon={<LikeOutlined />}
                             onClick={() => handleLike(item._id)}
                           >
-                            Like
+                            Thích
                           </Button>
                           <Button
                             type="text"
@@ -234,7 +237,7 @@ export default function HomePage() {
                             icon={<CommentOutlined />}
                             onClick={() => handleComment(item._id)}
                           >
-                            Comment
+                            Bình luận
                           </Button>
                           <Button
                             type="text"
@@ -242,7 +245,7 @@ export default function HomePage() {
                             className="flex-1 mx-1 transition-all duration-200 hover:w-[40%]"
                             icon={<ShareAltOutlined />}
                           >
-                            Share
+                            Chia sẻ
                           </Button>
                         </div>
                       </div>

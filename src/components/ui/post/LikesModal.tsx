@@ -10,12 +10,7 @@ interface LikesModalProps {
 
 export default function LikesModal({ open, onClose, likes }: LikesModalProps) {
   return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      footer={null}
-      title="People who liked this"
-    >
+    <Modal open={open} onCancel={onClose} footer={null} title="Lượt thích">
       <List<ILike>
         dataSource={likes}
         renderItem={(like) => (

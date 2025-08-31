@@ -26,6 +26,7 @@ export default function CommentSection({
       <List<IComment>
         itemLayout="horizontal"
         dataSource={comments}
+        locale={{ emptyText: "Không có bình luận" }}
         renderItem={(comment) => (
           <List.Item key={comment._id}>
             <List.Item.Meta

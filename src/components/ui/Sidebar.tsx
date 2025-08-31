@@ -17,8 +17,8 @@ export default function Sidebar() {
   const menuItems = useMemo(
     () => [
       { key: "favourite", label: "Videos", href: "/videos" },
-      { key: "hot", label: "News", href: "/news" },
-      { key: "trending", label: "Trending", href: "/trending" },
+      { key: "hot", label: "Tin tức", href: "/news" },
+      { key: "trending", label: "Xu hướng", href: "/trending" },
     ],
     []
   );

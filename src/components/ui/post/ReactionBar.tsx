@@ -20,10 +20,10 @@ export default function ReactionBar({ liked, onToggleLike }: ReactionBarProps) {
           liked ? "text-blue-500" : "text-gray-700"
         }`}
       >
-        {liked ? "Liked" : "Like"}
+        {liked ? "Đã thích" : "Thích"}
       </Button>
       <Button type="text" icon={<CommentOutlined />} className="flex-1">
-        Comment
+        Bình luận
       </Button>
     </div>
   );

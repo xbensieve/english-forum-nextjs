@@ -54,7 +54,7 @@ export default function CommentBox({
         <Input.TextArea
           disabled={disabled}
           autoSize={{ minRows: 1, maxRows: 4 }}
-          placeholder="Write a comment..."
+          placeholder="Viết bình luận..."
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
           onPressEnter={(e) => {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Button, Modal, Spin, Tooltip, Typography } from "antd";
+import { Avatar, Button, Modal, Spin, Tooltip, Typography } from "antd";
 import Link from "next/link";
 import axios from "axios";
 import ChatContainer from "./ChatContainer";
@@ -19,11 +19,14 @@ import {
   listenForCallEnd,
 } from "@/lib/callService";
 import { ref, onValue } from "firebase/database";
-import { Phone, PhoneCallIcon, PhoneOffIcon } from "lucide-react";
+import { PhoneCallIcon, PhoneOffIcon } from "lucide-react";
+import toast from "react-hot-toast";
+
 const { Text } = Typography;
+
 interface IncomingCall {
   sdp: string;
-  type: RTCSdpType; // "offer" | "answer" | "pranswer" | "rollback"
+  type: RTCSdpType;
   callerId: string;
 }
 export interface User {
@@ -32,13 +35,11 @@ export interface User {
   email: string;
   avatar?: string;
 }
-
 export interface Message {
   senderId: string;
   text: string;
   timestamp: number;
 }
-
 interface ChatPageProps {
   userId: string;
 }
@@ -50,17 +51,37 @@ export default function ChatPage({ userId }: ChatPageProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
   // --- CALL STATE ---
-  const [calling, setCalling] = useState(false);
+  const [callDuration, setCallDuration] = useState(0);
+  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const dialTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [isDialing, setIsDialing] = useState(false);
+  const [inCall, setInCall] = useState(false);
   const [incomingCall, setIncomingCall] = useState<IncomingCall | null>(null);
+  const [calling, setCalling] = useState(false);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [callEnded, setCallEnded] = useState<number | null>(null);
+  const [showCallEnded, setShowCallEnded] = useState(false);
+
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const currentUserId = session?.user?.id;
+
   const chatId =
     currentUserId && user?._id
       ? [currentUserId, user._id].sort().join("_")
       : "";
 
+  function formatDuration(seconds: number) {
+    const m = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  }
+
+  // --- LOAD USER ---
   useEffect(() => {
     try {
       const realId = atob(userId);
@@ -73,69 +94,132 @@ export default function ChatPage({ userId }: ChatPageProps) {
       setLoading(false);
     }
   }, [userId]);
+
   // --- LISTEN MESSAGES ---
   useEffect(() => {
     if (!chatId) return;
     listenMessages(chatId, setMessages);
   }, [chatId]);
 
-  // --- LISTEN FOR INCOMING CALLS ---
+  // --- LISTEN FOR CALL SIGNALS ---
   useEffect(() => {
     if (!chatId || !currentUserId || !user?._id) return;
 
+    // listen for incoming offer
     const offerRef = ref(db, `chats/${chatId}/call/offer`);
     onValue(offerRef, (snap) => {
       const offer = snap.val();
-      if (offer && offer.callerId !== currentUserId) {
+      if (offer && offer.callerId && offer.callerId !== currentUserId) {
+        console.log("Incoming offer:", offer);
         setIncomingCall(offer);
+      } else {
+        setIncomingCall(null);
       }
     });
 
-    // Setup listeners for call signaling
+    // listen for answer
+    const answerRef = ref(db, `chats/${chatId}/call/answer`);
+    onValue(answerRef, (snap) => {
+      const answer = snap.val();
+      if (answer && isDialing) {
+        console.log("Answer received:", answer);
+        setIsDialing(false);
+        setInCall(true);
+        setCallDuration(0);
+      }
+    });
+
+    // ICE / answer / end listeners
     listenForAnswer(chatId);
     listenForCandidates(chatId, user._id);
     listenForCandidates(chatId, currentUserId);
 
+    const firstLoad = { current: true };
     listenForCallEnd(chatId, () => {
+      if (firstLoad.current) {
+        firstLoad.current = false;
+        return;
+      }
+      if (callTimerRef.current) {
+        clearInterval(callTimerRef.current);
+        callTimerRef.current = null;
+      }
+      setCallEnded(callDuration);
+      setShowCallEnded(true);
       setCalling(false);
+      setIsDialing(false);
+      setInCall(false);
       setIncomingCall(null);
       setRemoteStream(null);
     });
-  }, [chatId, currentUserId, user?._id]);
 
-  // --- LISTEN MESSAGES ---
-  useEffect(() => {
-    if (!session?.user?.id || !user?._id) return;
-    const chatId = [session.user.id, user._id].sort().join("_");
-    listenMessages(chatId, setMessages);
-  }, [session?.user?.id, user?._id]);
+    return () => {
+      if (dialTimeoutRef.current) {
+        clearTimeout(dialTimeoutRef.current);
+        dialTimeoutRef.current = null;
+      }
+      if (callTimerRef.current) {
+        clearInterval(callTimerRef.current);
+        callTimerRef.current = null;
+      }
+    };
+  }, [chatId, currentUserId, user?._id, isDialing, callDuration]);
 
+  // --- SEND MESSAGE ---
   const handleSend = async () => {
     if (!input.trim() || !session?.user?.id || !user?._id) return;
     const chatId = [session.user.id, user._id].sort().join("_");
     await sendMessage(chatId, session.user.id, input.trim());
     setInput("");
   };
+
   // --- CALL ACTIONS ---
   const handleStartCall = async () => {
     if (!chatId || !currentUserId) return;
+    setIsDialing(true);
     setCalling(true);
+    console.log("Start call:", currentUserId);
     await startCall(chatId, currentUserId);
+
+    if (dialTimeoutRef.current) clearTimeout(dialTimeoutRef.current);
+    dialTimeoutRef.current = setTimeout(() => {
+      handleEndCall();
+      toast("Không có phản hồi từ đối phương, cuộc gọi đã kết thúc");
+    }, 30000);
   };
+
   const handleAnswerCall = async () => {
     if (!chatId || !currentUserId) return;
     setIncomingCall(null);
     setCalling(true);
+    setIsDialing(false);
+    setInCall(true);
+    setCallDuration(0);
+    console.log("Answer call:", currentUserId);
     await answerCall(chatId, currentUserId);
   };
 
   const handleEndCall = async () => {
     if (!chatId) return;
     await endCall(chatId);
-    setCalling(false);
+    if (callTimerRef.current) {
+      clearInterval(callTimerRef.current);
+      callTimerRef.current = null;
+    }
+    setCallEnded(callDuration);
+    setShowCallEnded(true);
+    setInCall(false);
+    setIsDialing(false);
     setIncomingCall(null);
     setRemoteStream(null);
+    setCalling(false);
+    if (dialTimeoutRef.current) {
+      clearTimeout(dialTimeoutRef.current);
+      dialTimeoutRef.current = null;
+    }
   };
+
+  // --- REMOTE STREAM ---
   useEffect(() => {
     setOnRemoteStream((stream) => {
       setRemoteStream(stream);
@@ -147,6 +231,8 @@ export default function ChatPage({ userId }: ChatPageProps) {
       remoteAudioRef.current.srcObject = remoteStream;
     }
   }, [remoteStream]);
+
+  // --- UI ---
   if (!session?.user) {
     return (
       <div className="flex justify-center items-center h-[600px]">
@@ -185,19 +271,20 @@ export default function ChatPage({ userId }: ChatPageProps) {
 
   return (
     <div className="w-full h-[640px] flex">
-      {/* Main content */}
       <div className="flex flex-col flex-1 md:ml-[200px] p-2 sm:p-4">
         <div className="flex flex-col md:flex-row flex-1 rounded-none overflow-hidden">
-          {/* Chat Section */}
           <div className="flex flex-col flex-1">
-            {/* Header */}
             <div className="flex justify-between items-center px-3 py-4 rounded-none">
-              <Text strong className="truncate">
-                {user.name}
-              </Text>
+              <div className="flex items-center gap-2">
+                <Avatar src={user.avatar || "/default-avatar.png"} size={32} />
+                <Text strong className="truncate">
+                  {user.name}
+                </Text>
+              </div>
+
               <audio ref={remoteAudioRef} autoPlay controls={false} />
-              {!calling ? (
-                <Tooltip title="Start Call" placement="top">
+              {!calling && !incomingCall ? (
+                <Tooltip title="Bắt đầu cuộc gọi" placement="top">
                   <Button
                     type="primary"
                     shape="circle"
@@ -209,20 +296,19 @@ export default function ChatPage({ userId }: ChatPageProps) {
                   </Button>
                 </Tooltip>
               ) : (
-                <Tooltip title="End Call" placement="top">
+                <Tooltip title="Kết thúc cuộc gọi" placement="top">
                   <Button
                     shape="circle"
                     size="middle"
                     className="flex items-center justify-center bg-red-500 hover:bg-red-600 border-none transition-all"
                     onClick={handleEndCall}
                   >
-                    <PhoneOffIcon className="w-5 h-5 text-red-500" />
+                    <PhoneOffIcon className="w-5 h-5 text-white" />
                   </Button>
                 </Tooltip>
               )}
             </div>
 
-            {/* Chat Body */}
             <div className="flex-1 min-h-0.5">
               <ChatContainer
                 messages={messages}
@@ -236,29 +322,102 @@ export default function ChatPage({ userId }: ChatPageProps) {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="hidden md:flex w-[300px]">
             <UserInfoCard user={user} />
           </div>
         </div>
       </div>
 
-      {/* Incoming Call Modal */}
+      {/* --- GIAI ĐOẠN 2: ĐANG GỌI --- */}
+      <Modal
+        open={isDialing}
+        closable={false}
+        footer={null}
+        centered
+        width={400}
+      >
+        <div className="flex flex-col items-center gap-4 p-4">
+          <Avatar src={user.avatar || "/default-avatar.png"} size={64} />
+          <Text strong className="text-lg">
+            {user.name}
+          </Text>
+          <Text type="secondary">Đang gọi... Xin chờ đối phương trả lời</Text>
+          <Button
+            shape="circle"
+            size="large"
+            className="bg-red-500 hover:bg-red-600 border-none mt-4"
+            onClick={handleEndCall}
+          >
+            <PhoneOffIcon className="w-5 h-5 text-red-500" />
+          </Button>
+        </div>
+      </Modal>
+
       <Modal
         open={!!incomingCall}
-        onCancel={() => setIncomingCall(null)}
+        onCancel={handleEndCall}
         footer={[
-          <Button key="reject" danger onClick={() => setIncomingCall(null)}>
-            Reject
+          <Button key="reject" danger onClick={handleEndCall}>
+            Từ chối
           </Button>,
           <Button key="accept" type="primary" onClick={handleAnswerCall}>
-            Accept
+            Chấp nhận
           </Button>,
         ]}
+        centered
+        width={400}
       >
-        <p className="text-center">
-          <Phone /> Incoming call from {incomingCall?.callerId}
-        </p>
+        <div className="flex flex-col items-center gap-4 p-4">
+          <Avatar src={user.avatar || "/default-avatar.png"} size={64} />
+          <Text strong className="text-lg">
+            {user.name}
+          </Text>
+          <Text type="secondary">đang gọi cho bạn...</Text>
+        </div>
+      </Modal>
+
+      {/* --- GIAI ĐOẠN 3: TRONG CUỘC GỌI --- */}
+      <Modal open={inCall} closable={false} footer={null} centered width={400}>
+        <div className="flex flex-col items-center gap-4 p-4">
+          <Avatar src={user.avatar || "/default-avatar.png"} size={64} />
+          <Text strong className="text-lg">
+            {user.name}
+          </Text>
+          <Text type="secondary">Đang trong cuộc gọi...</Text>
+          <Text type="secondary">
+            Thời gian: {formatDuration(callDuration)}
+          </Text>
+          <Button
+            shape="circle"
+            size="large"
+            className="bg-red-500 hover:bg-red-600 border-none mt-4"
+            onClick={handleEndCall}
+          >
+            <PhoneOffIcon className="w-5 h-5 text-red-500" />
+          </Button>
+        </div>
+      </Modal>
+
+      {/* --- GIAI ĐOẠN 4: SAU KHI KẾT THÚC --- */}
+      <Modal
+        open={showCallEnded}
+        onOk={() => setShowCallEnded(false)}
+        footer={[
+          <Button key="ok" onClick={() => setShowCallEnded(false)}>
+            OK
+          </Button>,
+        ]}
+        centered
+        width={400}
+      >
+        <div className="flex flex-col items-center gap-4 p-4">
+          <Text strong className="text-lg">
+            Cuộc gọi đã kết thúc
+          </Text>
+          <Text type="secondary">
+            Thời gian: {formatDuration(callEnded || 0)}
+          </Text>
+        </div>
       </Modal>
     </div>
   );
