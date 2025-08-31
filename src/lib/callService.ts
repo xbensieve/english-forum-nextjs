@@ -33,9 +33,12 @@ function createPeerConnection(
   });
 
   pc.ontrack = (event: RTCTrackEvent) => {
-    if (onRemoteStream) {
-      onRemoteStream(event.streams[0]);
-    }
+    event.streams.forEach((stream) => {
+      if (stream.id === localStream?.id) return;
+      if (onRemoteStream) {
+        onRemoteStream(stream);
+      }
+    });
   };
 
   pc.onicecandidate = (event: RTCPeerConnectionIceEvent) => {
