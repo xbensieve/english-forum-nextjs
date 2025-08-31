@@ -28,13 +28,14 @@ export default function ChatInput({
   };
 
   return (
-    <div className="p-3 flex items-center gap-2 relative">
+    <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex items-center gap-2">
+      {/* Input */}
       <Input
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onPressEnter={onSend}
         placeholder="Nhập tin nhắn..."
-        className="flex-1"
+        className="rounded-full px-4 py-2"
         suffix={
           <SmileOutlined
             onClick={() => setShowEmojiPicker((prev) => !prev)}
@@ -42,14 +43,21 @@ export default function ChatInput({
           />
         }
       />
+
+      {/* Send button */}
       <div
         onClick={onSend}
         className="w-10 h-10 flex items-center justify-center text-blue-600 cursor-pointer rounded-full hover:bg-blue-100 transition-colors duration-200"
       >
         <SendOutlined />
       </div>
+
+      {/* Emoji picker */}
       {showEmojiPicker && (
-        <div ref={pickerRef} className="absolute bottom-12 right-0 z-10">
+        <div
+          ref={pickerRef}
+          className="absolute bottom-14 right-4 z-10 shadow-lg"
+        >
           <EmojiPicker onEmojiClick={handleEmojiClick} />
         </div>
       )}

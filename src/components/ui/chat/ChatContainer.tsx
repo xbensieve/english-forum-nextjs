@@ -26,12 +26,12 @@ export default function ChatContainer({
   setShowEmojiPicker,
 }: ChatContainerProps) {
   return (
-    <div className="flex flex-col h-[600px] bg-white rounded-2xl w-full">
+    <div className="w-full h-[560px] flex flex-col bg-white rounded-2xl">
       <div className="flex-1 overflow-y-auto">
         <MessageList messages={messages} currentUserId={currentUserId} />
       </div>
 
-      <div className="flex-shrink-0 border-t">
+      <div className="sticky bottom-0 bg-white">
         <ChatInput
           input={input}
           setInput={setInput}

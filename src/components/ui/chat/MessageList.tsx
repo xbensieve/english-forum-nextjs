@@ -19,7 +19,7 @@ export default function MessageList({
   }, [messages]);
 
   return (
-    <div className="flex-1 flex flex-col p-4 space-y-3 overflow-y-auto bg-gray-50">
+    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
       {messages.map((msg, i) => {
         const isSender = msg.senderId === currentUserId;
         return (
@@ -38,30 +38,11 @@ export default function MessageList({
             >
               {msg.text}
               <div className="text-xs mt-1 text-right opacity-70">
-                {(() => {
-                  const date = new Date(msg.timestamp);
-                  const today = new Date();
-                  const isToday =
-                    date.getDate() === today.getDate() &&
-                    date.getMonth() === today.getMonth() &&
-                    date.getFullYear() === today.getFullYear();
-
-                  return isToday
-                    ? date.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : date.toLocaleString([], {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      });
-                })()}
+                {new Date(msg.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </div>
-              {/* Notch for sent/received messages */}
             </div>
           </div>
         );

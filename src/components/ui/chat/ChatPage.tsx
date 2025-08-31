@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Button, Modal, Spin, Typography } from "antd";
+import { Button, Modal, Spin, Tooltip, Typography } from "antd";
 import Link from "next/link";
 import axios from "axios";
 import ChatContainer from "./ChatContainer";
@@ -19,6 +19,7 @@ import {
   listenForCallEnd,
 } from "@/lib/callService";
 import { ref, onValue } from "firebase/database";
+import { Phone, PhoneCallIcon, PhoneOffIcon } from "lucide-react";
 const { Text } = Typography;
 interface IncomingCall {
   sdp: string;
@@ -183,50 +184,82 @@ export default function ChatPage({ userId }: ChatPageProps) {
   }
 
   return (
-    <div className="fixed top-7 left-0 w-screen h-screen overflow-hidden flex items-center justify-center p-4">
-      <div className="flex w-full max-w-5xl gap-3">
-        <div className="w-full md:w-3/4 flex flex-col">
-          <div className="flex justify-between items-center p-3 border-b">
-            <Text strong>{user.name}</Text>
-            <audio ref={remoteAudioRef} autoPlay controls={false} />
-            {!calling ? (
-              <Button type="primary" onClick={handleStartCall}>
-                📞 Call
-              </Button>
-            ) : (
-              <Button danger onClick={handleEndCall}>
-                🔴 End Call
-              </Button>
-            )}
+    <div className="w-full h-[640px] flex">
+      {/* Main content */}
+      <div className="flex flex-col flex-1 md:ml-[200px] p-2 sm:p-4">
+        <div className="flex flex-col md:flex-row flex-1 rounded-none overflow-hidden">
+          {/* Chat Section */}
+          <div className="flex flex-col flex-1">
+            {/* Header */}
+            <div className="flex justify-between items-center px-3 py-4 rounded-none">
+              <Text strong className="truncate">
+                {user.name}
+              </Text>
+              <audio ref={remoteAudioRef} autoPlay controls={false} />
+              {!calling ? (
+                <Tooltip title="Start Call" placement="top">
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    size="middle"
+                    className="flex items-center justify-center bg-green-500 hover:bg-green-600 border-none shadow-md transition-all"
+                    onClick={handleStartCall}
+                  >
+                    <PhoneCallIcon className="w-5 h-5 text-white" />
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Tooltip title="End Call" placement="top">
+                  <Button
+                    shape="circle"
+                    size="middle"
+                    className="flex items-center justify-center bg-red-500 hover:bg-red-600 border-none transition-all"
+                    onClick={handleEndCall}
+                  >
+                    <PhoneOffIcon className="w-5 h-5 text-red-500" />
+                  </Button>
+                </Tooltip>
+              )}
+            </div>
+
+            {/* Chat Body */}
+            <div className="flex-1 min-h-0.5">
+              <ChatContainer
+                messages={messages}
+                currentUserId={session.user.id}
+                input={input}
+                setInput={setInput}
+                onSend={handleSend}
+                showEmojiPicker={showEmojiPicker}
+                setShowEmojiPicker={setShowEmojiPicker}
+              />
+            </div>
           </div>
-          <ChatContainer
-            messages={messages}
-            currentUserId={session.user.id}
-            input={input}
-            setInput={setInput}
-            onSend={handleSend}
-            showEmojiPicker={showEmojiPicker}
-            setShowEmojiPicker={setShowEmojiPicker}
-          />
+
+          {/* Sidebar */}
+          <div className="hidden md:flex w-[300px]">
+            <UserInfoCard user={user} />
+          </div>
         </div>
-        <div className="hidden md:flex w-1/4">
-          <UserInfoCard user={user} />
-        </div>
-        <Modal
-          open={!!incomingCall}
-          onCancel={() => setIncomingCall(null)}
-          footer={[
-            <Button key="reject" danger onClick={() => setIncomingCall(null)}>
-              Reject
-            </Button>,
-            <Button key="accept" type="primary" onClick={handleAnswerCall}>
-              Accept
-            </Button>,
-          ]}
-        >
-          <p>📞 Incoming call from {incomingCall?.callerId}</p>
-        </Modal>
       </div>
+
+      {/* Incoming Call Modal */}
+      <Modal
+        open={!!incomingCall}
+        onCancel={() => setIncomingCall(null)}
+        footer={[
+          <Button key="reject" danger onClick={() => setIncomingCall(null)}>
+            Reject
+          </Button>,
+          <Button key="accept" type="primary" onClick={handleAnswerCall}>
+            Accept
+          </Button>,
+        ]}
+      >
+        <p className="text-center">
+          <Phone /> Incoming call from {incomingCall?.callerId}
+        </p>
+      </Modal>
     </div>
   );
 }

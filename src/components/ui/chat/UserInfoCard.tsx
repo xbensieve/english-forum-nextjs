@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Button } from "antd";
+import { Button } from "antd";
 import Image from "next/image";
 import { UserX } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ export default function UserInfoCard({ user }: UserInfoCardProps) {
   const router = useRouter();
 
   return (
-    <Card className="w-full h-[600px] flex flex-col items-center justify-start gap-4 p-6">
+    <div className="w-full h-[600px] flex flex-col items-center justify-start gap-4 p-6">
       {user.avatar ? (
         <Image
           src={user.avatar}
@@ -35,6 +35,6 @@ export default function UserInfoCard({ user }: UserInfoCardProps) {
       >
         View Profile
       </Button>
-    </Card>
+    </div>
   );
 }
