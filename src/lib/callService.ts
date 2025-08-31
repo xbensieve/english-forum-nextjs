@@ -55,7 +55,14 @@ export async function startCall(
   chatId: string,
   callerId: string
 ): Promise<void> {
-  localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  localStream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    },
+    video: false,
+  });
   createPeerConnection(chatId, callerId);
 
   const offer: RTCSessionDescriptionInit = await pc!.createOffer();
@@ -72,7 +79,14 @@ export async function answerCall(
   chatId: string,
   calleeId: string
 ): Promise<void> {
-  localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  localStream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    },
+    video: false,
+  });
   createPeerConnection(chatId, calleeId);
 
   // lấy offer một lần bằng get
