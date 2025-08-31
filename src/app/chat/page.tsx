@@ -88,7 +88,7 @@ export default function ConversationsPage() {
     return () => unsubscribe();
   }, [session]);
 
-  if (status === "loading" || loading) return <Spin />;
+  if (status === "loading" || loading) return <Spin fullscreen />;
   if (!session?.user) return <div>Please log in</div>;
 
   const handleOpenChat = (partnerId: string) => {
